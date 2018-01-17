@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="60">
+    <Properties>
+        <Property name="app_id">${env:USERNAME}</Property>
+        <Property name="log_path">logs</Property>
+        <Property name="app_name">crc_main</Property>
+        <Property name="pattern">${app_id}-%d{yyyy-MM-dd HH:mm:ss,SSS}|%-5level|%t|%c{5.}.%M:%L|%replace{%msg}{\s+}{ }%n</Property>
+        <Property name="pattern_none_location">${app_id}-%d{yyyy-MM-dd HH:mm:ss,SSS}|%-5level|%t|%replace{%msg}{\s+}{ }%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout>
+                <Pattern>${pattern}</Pattern>
+            </PatternLayout>
+        </Console>
+
+        <RollingFile name="debug_file" fileName="${log_path}/debug_${app_id}.log" filePattern="logs/$${date:yyyy-MM}/${app_id}_debug-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>${pattern}</Pattern>
+            </PatternLayout>
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy compressionLevel = "5"/>
+        </RollingFile>
+
+        <RollingFile name="info_file" fileName="${log_path}/info_${app_id}.log" filePattern="logs/$${date:yyyy-MM}/${app_id}_info-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>${pattern}</Pattern>
+            </PatternLayout>
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+        </RollingFile>
+
+        <File name="error_file" fileName="${log_path}/error_${app_id}.log">
+            <PatternLayout>
+                <Pattern>${pattern}</Pattern>
+            </PatternLayout>
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <!-- 收发数据日志 -->
+        <!--<AsyncLogger name="com.cricket.dataservice.update" level="trace" includeLocation="false" >
+            <AppenderRef ref="routing_appender"/>
+        </AsyncLogger>-->
+
+        <!--
+        <Logger name="org.springframework.cloud.stream.binder.rabbit" level="info" /> &lt;!&ndash;stream使用&ndash;&gt;-->
+        <Logger name="org.apache.ibatis" level="debug" includeLocation="true" /> <!-- actuate 日志 -->
+        <Logger name="org.springframework.boot.autoconfigure" level="debug" includeLocation="true" />
+        <Root level="info" includeLocation="false">
+            <AppenderRef ref="info_file" />
+            <AppenderRef ref="error_file" />
+            <!--<AppenderRef ref="debug_file" />
+            <AppenderRef ref="trace_file" />-->
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
